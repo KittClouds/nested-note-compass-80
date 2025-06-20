@@ -5,15 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import { ThemeProvider } from "next-themes"; // Added import
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem> {/* Added ThemeProvider wrapper */}
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
       <Sonner />
       <BrowserRouter>
         <Routes>
@@ -24,7 +22,6 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-</ThemeProvider>
 );
 
 export default App;
