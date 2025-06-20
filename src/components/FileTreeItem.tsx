@@ -21,29 +21,26 @@ import {
 import { Button } from '@/components/ui/button';
 import { FileTreeItem as FileTreeItemType } from '@/types/notes';
 import { useNotes } from '@/contexts/NotesContext';
-import { CreateItemDialog } from '@/components/dialogs/CreateItemDialog';
 import { RenameDialog } from '@/components/dialogs/RenameDialog';
 import { DeleteConfirmDialog } from '@/components/dialogs/DeleteConfirmDialog';
 
 interface FileTreeItemProps {
   item: FileTreeItemType;
   level?: number;
+  onCreateNote: (parentId: string) => void;
+  onCreateFolder: (parentId: string) => void;
 }
 
-export function FileTreeItem({ item, level = 0 }: FileTreeItemProps) {
+export function FileTreeItem({ item, level = 0, onCreateNote, onCreateFolder }: FileTreeItemProps) {
   const { 
     selectedNote, 
     selectNote, 
-    createNote, 
-    createFolder, 
     deleteItem, 
     renameItem, 
     getChildItems 
   } = useNotes();
   
   const [isOpen, setIsOpen] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [createType, setCreateType] = useState<'note' | 'folder'>('note');
   const [showRenameDialog, setShowRenameDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -61,23 +58,11 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps) {
   };
 
   const handleCreateNote = () => {
-    setCreateType('note');
-    setShowCreateDialog(true);
+    onCreateNote(isFolder ? item.id : item.parentId || '');
   };
 
   const handleCreateFolder = () => {
-    setCreateType('folder');
-    setShowCreateDialog(true);
-  };
-
-  const handleCreate = (name: string) => {
-    if (createType === 'note') {
-      const newId = createNote(name, isFolder ? item.id : undefined);
-      selectNote(newId);
-    } else {
-      createFolder(name, isFolder ? item.id : undefined);
-    }
-    setIsOpen(true);
+    onCreateFolder(isFolder ? item.id : item.parentId || '');
   };
 
   const handleRename = (newName: string) => {
@@ -128,7 +113,13 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps) {
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {childItems.map((child) => (
-                      <FileTreeItem key={child.id} item={child} level={level + 1} />
+                      <FileTreeItem 
+                        key={child.id} 
+                        item={child} 
+                        level={level + 1} 
+                        onCreateNote={onCreateNote}
+                        onCreateFolder={onCreateFolder}
+                      />
                     ))}
                   </SidebarMenuSub>
                 </CollapsibleContent>
@@ -162,13 +153,6 @@ export function FileTreeItem({ item, level = 0 }: FileTreeItemProps) {
           </ContextMenuContent>
         </ContextMenu>
       </SidebarMenuItem>
-
-      <CreateItemDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-        type={createType}
-        onConfirm={handleCreate}
-      />
 
       <RenameDialog
         open={showRenameDialog}

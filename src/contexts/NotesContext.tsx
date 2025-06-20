@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Note, Folder, FileTreeItem, FileTreeState, NotesContextType } from '@/types/notes';
 import { generateId } from '@/utils/parsingUtils';
@@ -39,16 +38,20 @@ function createInitialState(): FileTreeState {
 }
 
 function saveToStorage(state: FileTreeState) {
-  const serializable = {
-    items: Array.from(state.items.entries()).map(([id, item]) => [id, {
-      ...item,
-      createdAt: item.createdAt.toISOString(),
-      updatedAt: item.updatedAt.toISOString(),
-    }]),
-    rootItems: state.rootItems,
-    selectedNoteId: state.selectedNoteId,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
+  try {
+    const serializable = {
+      items: Array.from(state.items.entries()).map(([id, item]) => [id, {
+        ...item,
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+      }]),
+      rootItems: state.rootItems,
+      selectedNoteId: state.selectedNoteId,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(serializable));
+  } catch (error) {
+    console.error('Failed to save to localStorage:', error);
+  }
 }
 
 function loadFromStorage(): FileTreeState {
@@ -72,7 +75,8 @@ function loadFromStorage(): FileTreeState {
       rootItems: parsed.rootItems,
       selectedNoteId: parsed.selectedNoteId,
     };
-  } catch {
+  } catch (error) {
+    console.error('Failed to load from localStorage:', error);
     return createInitialState();
   }
 }
@@ -83,10 +87,15 @@ interface NotesProviderProps {
 
 export function NotesProvider({ children }: NotesProviderProps) {
   const [state, setState] = useState<FileTreeState>(loadFromStorage);
+  const [isCreating, setIsCreating] = useState(false);
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage with debouncing
   useEffect(() => {
-    saveToStorage(state);
+    const timeoutId = setTimeout(() => {
+      saveToStorage(state);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [state]);
 
   const selectedNote = state.selectedNoteId 
@@ -94,6 +103,9 @@ export function NotesProvider({ children }: NotesProviderProps) {
     : null;
 
   const createNote = (name: string, parentId?: string): string => {
+    if (isCreating) return '';
+    
+    setIsCreating(true);
     const id = generateId();
     const note: Note = {
       id,
@@ -114,8 +126,12 @@ export function NotesProvider({ children }: NotesProviderProps) {
       if (parentId) {
         const parent = newItems.get(parentId) as Folder;
         if (parent && parent.type === 'folder') {
-          parent.children = [...parent.children, id];
-          parent.updatedAt = new Date();
+          const updatedParent = {
+            ...parent,
+            children: [...parent.children, id],
+            updatedAt: new Date(),
+          };
+          newItems.set(parentId, updatedParent);
         }
       } else {
         newRootItems.push(id);
@@ -129,10 +145,14 @@ export function NotesProvider({ children }: NotesProviderProps) {
       };
     });
 
+    setIsCreating(false);
     return id;
   };
 
   const createFolder = (name: string, parentId?: string): string => {
+    if (isCreating) return '';
+    
+    setIsCreating(true);
     const id = generateId();
     const folder: Folder = {
       id,
@@ -153,8 +173,12 @@ export function NotesProvider({ children }: NotesProviderProps) {
       if (parentId) {
         const parent = newItems.get(parentId) as Folder;
         if (parent && parent.type === 'folder') {
-          parent.children = [...parent.children, id];
-          parent.updatedAt = new Date();
+          const updatedParent = {
+            ...parent,
+            children: [...parent.children, id],
+            updatedAt: new Date(),
+          };
+          newItems.set(parentId, updatedParent);
         }
       } else {
         newRootItems.push(id);
@@ -167,6 +191,7 @@ export function NotesProvider({ children }: NotesProviderProps) {
       };
     });
 
+    setIsCreating(false);
     return id;
   };
 
@@ -194,8 +219,12 @@ export function NotesProvider({ children }: NotesProviderProps) {
       if (item.parentId) {
         const parent = newItems.get(item.parentId) as Folder;
         if (parent && parent.type === 'folder') {
-          parent.children = parent.children.filter(childId => childId !== id);
-          parent.updatedAt = new Date();
+          const updatedParent = {
+            ...parent,
+            children: parent.children.filter(childId => childId !== id),
+            updatedAt: new Date(),
+          };
+          newItems.set(item.parentId, updatedParent);
         }
       } else {
         const newRootItems = prev.rootItems.filter(itemId => itemId !== id);

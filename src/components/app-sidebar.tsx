@@ -27,26 +27,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { createNote, createFolder, selectNote, getChildItems } = useNotes();
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
   const [createType, setCreateType] = React.useState<'note' | 'folder'>('note');
+  const [parentId, setParentId] = React.useState<string | null>(null);
   
   const rootItems = getChildItems(null);
 
-  const handleCreateNote = () => {
+  const handleCreateNote = (newParentId?: string) => {
     setCreateType('note');
+    setParentId(newParentId || null);
     setShowCreateDialog(true);
   };
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = (newParentId?: string) => {
     setCreateType('folder');
+    setParentId(newParentId || null);
     setShowCreateDialog(true);
   };
 
   const handleCreate = (name: string) => {
     if (createType === 'note') {
-      const newId = createNote(name);
+      const newId = createNote(name, parentId || undefined);
       selectNote(newId);
     } else {
-      createFolder(name);
+      createFolder(name, parentId || undefined);
     }
+    setParentId(null);
   };
 
   return (
@@ -62,11 +66,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleCreateNote}>
+                <DropdownMenuItem onClick={() => handleCreateNote()}>
                   <FileText className="h-4 w-4" />
                   New Note
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCreateFolder}>
+                <DropdownMenuItem onClick={() => handleCreateFolder()}>
                   <FolderPlus className="h-4 w-4" />
                   New Folder
                 </DropdownMenuItem>
@@ -80,7 +84,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               <SidebarMenu>
                 {rootItems.map((item) => (
-                  <FileTreeItem key={item.id} item={item} />
+                  <FileTreeItem 
+                    key={item.id} 
+                    item={item} 
+                    onCreateNote={handleCreateNote}
+                    onCreateFolder={handleCreateFolder}
+                  />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
