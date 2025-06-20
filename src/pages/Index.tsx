@@ -17,6 +17,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import RichEditor from "@/components/RichEditor";
+import { ConnectionsPanelContainer } from "@/components/ConnectionsPanelContainer";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { NotesProvider, useNotes } from "@/contexts/NotesContext";
@@ -24,6 +25,7 @@ import { NotesProvider, useNotes } from "@/contexts/NotesContext";
 function NotesApp() {
   const { theme } = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(true);
+  const [connectionsOpen, setConnectionsOpen] = useState(true);
   const { selectedNote, updateNoteContent } = useNotes();
 
   const handleEditorChange = (content: string) => {
@@ -37,7 +39,7 @@ function NotesApp() {
       <RightSidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
-          <SidebarInset>
+          <SidebarInset className="flex flex-col">
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
@@ -62,16 +64,24 @@ function NotesApp() {
               </div>
             </header>
             
-            <div className="flex-1 h-[calc(100vh-4rem)]">
+            <div className="flex-1 flex flex-col min-h-0">
               {selectedNote ? (
-                <RichEditor
-                  content={selectedNote.content}
-                  onChange={handleEditorChange}
-                  isDarkMode={theme === 'dark'}
-                  toolbarVisible={toolbarVisible}
-                  onToolbarVisibilityChange={setToolbarVisible}
-                  noteId={selectedNote.id}
-                />
+                <>
+                  <div className="flex-1 min-h-0">
+                    <RichEditor
+                      content={selectedNote.content}
+                      onChange={handleEditorChange}
+                      isDarkMode={theme === 'dark'}
+                      toolbarVisible={toolbarVisible}
+                      onToolbarVisibilityChange={setToolbarVisible}
+                      noteId={selectedNote.id}
+                    />
+                  </div>
+                  <ConnectionsPanelContainer 
+                    isOpen={connectionsOpen}
+                    onToggle={() => setConnectionsOpen(!connectionsOpen)}
+                  />
+                </>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
                   Select a note to start editing
