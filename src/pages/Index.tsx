@@ -1,5 +1,5 @@
-
 import { AppSidebar } from "@/components/app-sidebar"
+import RightSidebar from "@/components/RightSidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -106,6 +106,7 @@ const Index = () => {
             </Card>
           </div>
         </SidebarInset>
+        <RightSidebar />
       </div>
     </SidebarProvider>
   )
