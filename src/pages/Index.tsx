@@ -18,16 +18,18 @@ import {
 } from "@/components/ui/sidebar"
 import RichEditor from "@/components/RichEditor";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { NotesProvider, useNotes } from "@/contexts/NotesContext";
 
-const Index = () => {
+function NotesApp() {
   const { theme } = useTheme();
-  const [editorContent, setEditorContent] = useState('{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Welcome to your note editor! Try typing some notes with special syntax like #tags, [[wiki links]], or <<cross links>>."}]}]}');
+  const { selectedNote, updateNoteContent } = useNotes();
   const [toolbarVisible, setToolbarVisible] = useState(true);
 
   const handleEditorChange = (content: string) => {
-    setEditorContent(content);
-    console.log('Editor content changed:', content);
+    if (selectedNote) {
+      updateNoteContent(selectedNote.id, content);
+    }
   };
 
   return (
@@ -49,7 +51,7 @@ const Index = () => {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Welcome</BreadcrumbPage>
+                    <BreadcrumbPage>{selectedNote?.name || 'Select a note'}</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -59,20 +61,37 @@ const Index = () => {
             </header>
             
             <div className="flex-1 h-[calc(100vh-4rem)]">
-              <RichEditor
-                content={editorContent}
-                onChange={handleEditorChange}
-                isDarkMode={theme === 'dark'}
-                toolbarVisible={toolbarVisible}
-                onToolbarVisibilityChange={setToolbarVisible}
-              />
+              {selectedNote ? (
+                <RichEditor
+                  content={selectedNote.content}
+                  onChange={handleEditorChange}
+                  isDarkMode={theme === 'dark'}
+                  toolbarVisible={toolbarVisible}
+                  onToolbarVisibilityChange={setToolbarVisible}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium mb-2">No note selected</h3>
+                    <p>Select a note from the sidebar or create a new one to get started.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </SidebarInset>
           <RightSidebar />
         </div>
       </RightSidebarProvider>
     </SidebarProvider>
-  )
+  );
+}
+
+const Index = () => {
+  return (
+    <NotesProvider>
+      <NotesApp />
+    </NotesProvider>
+  );
 }
 
 export default Index
