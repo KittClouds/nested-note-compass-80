@@ -123,13 +123,23 @@ export function NotesProvider({ children }: { children: ReactNode }) {
 
   const deleteItem = (id: string) => {
     setState(prev => {
-      // Get all descendant IDs to delete
-      const getDescendants = (parentId: string): string[] => {
+      // Get all descendant IDs to delete with cycle detection
+      const getDescendants = (parentId: string, visited: Set<string> = new Set()): string[] => {
+        // Prevent infinite recursion by checking if we've already visited this node
+        if (visited.has(parentId)) {
+          console.warn(`Circular reference detected for item ${parentId}`);
+          return [];
+        }
+        
+        visited.add(parentId);
+        
         const children = prev.items.filter(item => item.parentId === parentId);
         const descendants = children.map(child => child.id);
+        
         children.forEach(child => {
-          descendants.push(...getDescendants(child.id));
+          descendants.push(...getDescendants(child.id, new Set(visited)));
         });
+        
         return descendants;
       };
 

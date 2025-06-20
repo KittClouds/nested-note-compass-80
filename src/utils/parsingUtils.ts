@@ -197,20 +197,20 @@ export function parseAllNotes(notes: { id: string; content: any; type?: string }
   notes.forEach(note => {
     // Only parse actual notes; folders/other types get empty arrays
     if (!note.type || note.type === 'note') {
-        const { tags, mentions, links, entities, triples, backlinks } = parseNoteConnections(note.content);
-        tagsMap.set(note.id, tags);
-        mentionsMap.set(note.id, mentions);
-        linksMap.set(note.id, links);
-        entitiesMap.set(note.id, entities);
-        triplesMap.set(note.id, triples);
-        backlinksMap.set(note.id, backlinks);
+      const connections = parseNoteConnections(note.content);
+      tagsMap.set(note.id, connections.tags);
+      mentionsMap.set(note.id, connections.mentions);
+      linksMap.set(note.id, connections.links);
+      entitiesMap.set(note.id, connections.entities);
+      triplesMap.set(note.id, connections.triples);
+      backlinksMap.set(note.id, connections.backlinks);
     } else {
-        tagsMap.set(note.id, []);
-        mentionsMap.set(note.id, []);
-        linksMap.set(note.id, []);
-        entitiesMap.set(note.id, []);
-        triplesMap.set(note.id, triples);
-        backlinksMap.set(note.id, []);
+      tagsMap.set(note.id, []);
+      mentionsMap.set(note.id, []);
+      linksMap.set(note.id, []);
+      entitiesMap.set(note.id, []);
+      triplesMap.set(note.id, []);
+      backlinksMap.set(note.id, []);
     }
   });
 
