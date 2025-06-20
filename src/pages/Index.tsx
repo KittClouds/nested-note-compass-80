@@ -1,4 +1,3 @@
-
 import { AppSidebar } from "@/components/app-sidebar"
 import RightSidebar from "@/components/RightSidebar"
 import { RightSidebarProvider, RightSidebarTrigger } from "@/components/RightSidebarProvider"
@@ -17,8 +16,20 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import RichEditor from "@/components/RichEditor";
+import { useTheme } from "next-themes";
+import { useState } from "react";
 
 const Index = () => {
+  const { theme } = useTheme();
+  const [editorContent, setEditorContent] = useState('{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Welcome to your note editor! Try typing some notes with special syntax like #tags, [[wiki links]], or <<cross links>>."}]}]}');
+  const [toolbarVisible, setToolbarVisible] = useState(true);
+
+  const handleEditorChange = (content: string) => {
+    setEditorContent(content);
+    console.log('Editor content changed:', content);
+  };
+
   return (
     <SidebarProvider>
       <RightSidebarProvider>
@@ -92,21 +103,23 @@ const Index = () => {
                 </Card>
               </div>
               
-              {/* Main editor area placeholder */}
+              {/* Rich Text Editor */}
               <Card className="flex-1 min-h-[60vh]">
                 <CardHeader>
                   <CardTitle>Note Editor</CardTitle>
                   <CardDescription>
-                    This is where your note editor will go. Select a note from the sidebar or create a new one to start editing.
+                    Start writing your notes with rich text formatting and special syntax support.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1">
-                  <div className="bg-muted/20 rounded-lg h-full min-h-[400px] flex items-center justify-center text-muted-foreground">
-                    <div className="text-center space-y-2">
-                      <div className="text-2xl">📝</div>
-                      <p>Select a note to start editing</p>
-                      <p className="text-sm">or create a new note from the sidebar</p>
-                    </div>
+                <CardContent className="flex-1 p-0">
+                  <div className="h-full">
+                    <RichEditor
+                      content={editorContent}
+                      onChange={handleEditorChange}
+                      isDarkMode={theme === 'dark'}
+                      toolbarVisible={toolbarVisible}
+                      onToolbarVisibilityChange={setToolbarVisible}
+                    />
                   </div>
                 </CardContent>
               </Card>
