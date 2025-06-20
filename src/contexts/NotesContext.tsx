@@ -15,11 +15,14 @@ interface NotesContextType {
   toggleFolder: (id: string) => void;
   getItemsByParent: (parentId?: string) => FileSystemItem[];
   getConnectionsForNote: (noteId: string) => (ParsedConnections & { crosslinks: Array<{ noteId: string; label: string }> }) | null;
+  getEntityAttributes: (entityKey: string) => Record<string, any>;
+  setEntityAttributes: (entityKey: string, attributes: Record<string, any>) => void;
 }
 
 const NotesContext = createContext<NotesContextType | null>(null);
 
 const STORAGE_KEY = 'notes-app-data';
+const ENTITY_ATTRIBUTES_KEY = 'notes-app-entity-attributes';
 
 const defaultContent = '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Start writing your note..."}]}]}';
 
@@ -67,6 +70,26 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       console.error('Failed to save notes to localStorage:', error);
     }
   }, [state]);
+
+  // Entity attributes state
+  const [entityAttributes, setEntityAttributesState] = useState<Record<string, Record<string, any>>>(() => {
+    try {
+      const saved = localStorage.getItem(ENTITY_ATTRIBUTES_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch (error) {
+      console.error('Failed to load entity attributes from localStorage:', error);
+      return {};
+    }
+  });
+
+  // Save entity attributes to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(ENTITY_ATTRIBUTES_KEY, JSON.stringify(entityAttributes));
+    } catch (error) {
+      console.error('Failed to save entity attributes to localStorage:', error);
+    }
+  }, [entityAttributes]);
 
   const selectedNote = state.selectedItemId 
     ? state.items.find(item => item.id === state.selectedItemId && item.type === 'note') as Note || null
@@ -234,6 +257,17 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     };
   };
 
+  const getEntityAttributes = (entityKey: string): Record<string, any> => {
+    return entityAttributes[entityKey] || {};
+  };
+
+  const setEntityAttributes = (entityKey: string, attributes: Record<string, any>) => {
+    setEntityAttributesState(prev => ({
+      ...prev,
+      [entityKey]: attributes
+    }));
+  };
+
   return (
     <NotesContext.Provider value={{
       state,
@@ -246,7 +280,9 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       updateNoteContent,
       toggleFolder,
       getItemsByParent,
-      getConnectionsForNote
+      getConnectionsForNote,
+      getEntityAttributes,
+      setEntityAttributes
     }}>
       {children}
     </NotesContext.Provider>

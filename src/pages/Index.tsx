@@ -1,4 +1,3 @@
-
 import { AppSidebar } from "@/components/app-sidebar"
 import RightSidebar from "@/components/RightSidebar"
 import { RightSidebarProvider, RightSidebarTrigger } from "@/components/RightSidebarProvider"
@@ -21,6 +20,7 @@ import { ConnectionsPanelContainer } from "@/components/ConnectionsPanelContaine
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { NotesProvider, useNotes } from "@/contexts/NotesContext";
+import { EntityManagerDrawer } from "@/components/entity-manager/EntityManagerDrawer";
 
 function NotesApp() {
   const { theme } = useTheme();
@@ -59,7 +59,8 @@ function NotesApp() {
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center gap-2">
+                <EntityManagerDrawer />
                 <RightSidebarTrigger />
               </div>
             </header>
