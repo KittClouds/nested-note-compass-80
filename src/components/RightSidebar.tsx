@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings } from 'lucide-react';
 import {
   SidebarContent,
@@ -9,8 +9,11 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { RightSidebar as RightSidebarWrapper } from './RightSidebarProvider';
+import { ConnectionsPanelContainer } from './ConnectionsPanelContainer';
 
 const RightSidebar = () => {
+  const [connectionsOpen, setConnectionsOpen] = useState(true);
+
   return (
     <RightSidebarWrapper className="border-l border-border/50">
       <SidebarHeader className="p-4 border-b border-border/50">
@@ -41,6 +44,11 @@ const RightSidebar = () => {
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
+        
+        <ConnectionsPanelContainer 
+          isOpen={connectionsOpen}
+          onToggle={() => setConnectionsOpen(!connectionsOpen)}
+        />
         
         <SidebarGroup>
           <SidebarGroupLabel>Statistics</SidebarGroupLabel>

@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Note, Folder, FileSystemItem, FileTreeState } from '@/types/notes';
+import { parseNoteConnections, ParsedConnections } from '@/utils/parsingUtils';
 
 interface NotesContextType {
   state: FileTreeState;
@@ -14,6 +14,7 @@ interface NotesContextType {
   updateNoteContent: (id: string, content: string) => void;
   toggleFolder: (id: string) => void;
   getItemsByParent: (parentId?: string) => FileSystemItem[];
+  getConnectionsForNote: (noteId: string) => (ParsedConnections & { crosslinks: Array<{ noteId: string; label: string }> }) | null;
 }
 
 const NotesContext = createContext<NotesContextType | null>(null);
@@ -189,6 +190,50 @@ export function NotesProvider({ children }: { children: ReactNode }) {
     return state.items.filter(item => item.parentId === parentId);
   };
 
+  const getConnectionsForNote = (noteId: string): (ParsedConnections & { crosslinks: Array<{ noteId: string; label: string }> }) | null => {
+    const note = state.items.find(item => item.id === noteId && item.type === 'note') as Note;
+    if (!note) return null;
+
+    // Parse connections from the note content
+    let baseConnections: ParsedConnections;
+    try {
+      const contentObj = typeof note.content === 'string' ? JSON.parse(note.content) : note.content;
+      baseConnections = parseNoteConnections(contentObj);
+    } catch (error) {
+      console.error('Failed to parse note content for connections:', error);
+      baseConnections = {
+        tags: [],
+        mentions: [],
+        links: [],
+        entities: [],
+        triples: [],
+        backlinks: []
+      };
+    }
+
+    // Find crosslinks - notes that reference this note
+    const crosslinks: Array<{ noteId: string; label: string }> = [];
+    const allNotes = state.items.filter(item => item.type === 'note') as Note[];
+    
+    allNotes.forEach(otherNote => {
+      if (otherNote.id === noteId) return;
+      
+      // Check if this note references the target note by title
+      const noteTitle = note.title;
+      if (otherNote.content.includes(`<<${noteTitle}>>`)) {
+        crosslinks.push({
+          noteId: otherNote.id,
+          label: otherNote.title
+        });
+      }
+    });
+
+    return {
+      ...baseConnections,
+      crosslinks
+    };
+  };
+
   return (
     <NotesContext.Provider value={{
       state,
@@ -200,7 +245,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       selectItem,
       updateNoteContent,
       toggleFolder,
-      getItemsByParent
+      getItemsByParent,
+      getConnectionsForNote
     }}>
       {children}
     </NotesContext.Provider>
