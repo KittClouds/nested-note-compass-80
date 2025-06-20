@@ -18,20 +18,34 @@ import {
 import RichEditor from "@/components/RichEditor";
 import { ConnectionsPanelContainer } from "@/components/ConnectionsPanelContainer";
 import { useTheme } from "next-themes";
-import { useState } from "react";
+import { useState, useRef } from "react"; // Added useRef
 import { NotesProvider, useNotes } from "@/contexts/NotesContext";
 import { EntityManagerDrawer } from "@/components/entity-manager/EntityManagerDrawer";
+import { toggleDarkModeWithAnimation } from "@/lib/theme-utils"; // Added
+import { Button } from "@/components/ui/button"; // Added
+import { Sun, Moon } from "lucide-react"; // Added
 
 function NotesApp() {
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme(); // Get theme and setTheme
   const [toolbarVisible, setToolbarVisible] = useState(true);
   const [connectionsOpen, setConnectionsOpen] = useState(true);
   const { selectedNote, updateNoteContent } = useNotes();
+  const toggleButtonRef = useRef<HTMLButtonElement>(null); // Create ref for the button
 
   const handleEditorChange = (content: string) => {
     if (selectedNote) {
       updateNoteContent(selectedNote.id, content);
     }
+  };
+
+  // Handler for the theme toggle
+  const handleThemeToggle = () => {
+    // Ensure theme is either 'light' or 'dark' before passing to toggleDarkModeWithAnimation
+    const currentTheme = theme === 'system' ?
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : (theme as 'light' | 'dark');
+
+    toggleDarkModeWithAnimation(currentTheme, setTheme, toggleButtonRef);
   };
 
   return (
@@ -60,6 +74,20 @@ function NotesApp() {
                 </BreadcrumbList>
               </Breadcrumb>
               <div className="ml-auto flex items-center gap-2">
+                {/* Theme Toggle Button */}
+                <Button
+                  ref={toggleButtonRef}
+                  variant="outline"
+                  size="icon"
+                  onClick={handleThemeToggle}
+                  aria-label="Toggle theme"
+                >
+                  {theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
                 <EntityManagerDrawer />
                 <RightSidebarTrigger />
               </div>
@@ -72,7 +100,8 @@ function NotesApp() {
                     <RichEditor
                       content={selectedNote.content}
                       onChange={handleEditorChange}
-                      isDarkMode={theme === 'dark'}
+                      // Pass resolved theme to RichEditor
+                      isDarkMode={theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}
                       toolbarVisible={toolbarVisible}
                       onToolbarVisibilityChange={setToolbarVisible}
                       noteId={selectedNote.id}
