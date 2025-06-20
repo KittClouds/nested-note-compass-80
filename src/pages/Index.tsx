@@ -1,3 +1,4 @@
+
 import { AppSidebar } from "@/components/app-sidebar"
 import RightSidebar from "@/components/RightSidebar"
 import { RightSidebarProvider, RightSidebarTrigger } from "@/components/RightSidebarProvider"
@@ -15,7 +16,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import RichEditor from "@/components/RichEditor";
 import { useTheme } from "next-themes";
 import { useState } from "react";
@@ -58,71 +58,14 @@ const Index = () => {
               </div>
             </header>
             
-            <div className="flex flex-1 flex-col gap-4 p-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                    <CardDescription>Get started with your notes</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="bg-muted/50 h-8 rounded flex items-center px-3 text-sm">Create New Note</div>
-                      <div className="bg-muted/50 h-8 rounded flex items-center px-3 text-sm">New Folder</div>
-                      <div className="bg-muted/50 h-8 rounded flex items-center px-3 text-sm">Import Notes</div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Recent Activity</CardTitle>
-                    <CardDescription>Your latest note updates</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="bg-muted/50 h-6 rounded"></div>
-                      <div className="bg-muted/50 h-6 rounded"></div>
-                      <div className="bg-muted/50 h-6 rounded"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Statistics</CardTitle>
-                    <CardDescription>Your note-taking progress</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="bg-muted/50 h-6 rounded"></div>
-                      <div className="bg-muted/50 h-6 rounded"></div>
-                      <div className="bg-muted/50 h-6 rounded"></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Rich Text Editor */}
-              <Card className="flex-1 min-h-[60vh]">
-                <CardHeader>
-                  <CardTitle>Note Editor</CardTitle>
-                  <CardDescription>
-                    Start writing your notes with rich text formatting and special syntax support.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 p-0">
-                  <div className="h-full">
-                    <RichEditor
-                      content={editorContent}
-                      onChange={handleEditorChange}
-                      isDarkMode={theme === 'dark'}
-                      toolbarVisible={toolbarVisible}
-                      onToolbarVisibilityChange={setToolbarVisible}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex-1 h-[calc(100vh-4rem)]">
+              <RichEditor
+                content={editorContent}
+                onChange={handleEditorChange}
+                isDarkMode={theme === 'dark'}
+                toolbarVisible={toolbarVisible}
+                onToolbarVisibilityChange={setToolbarVisible}
+              />
             </div>
           </SidebarInset>
           <RightSidebar />
