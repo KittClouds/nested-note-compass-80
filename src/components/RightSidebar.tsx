@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings, PanelRight } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -8,30 +8,9 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 
-// Custom trigger for the right sidebar
-const RightSidebarTrigger = () => {
-  const { toggleSidebar } = useSidebar();
-  
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-7 w-7"
-      onClick={toggleSidebar}
-    >
-      <PanelRight className="h-4 w-4" />
-      <span className="sr-only">Toggle Right Sidebar</span>
-    </Button>
-  );
-};
-
-const RightSidebarContent = () => {
+const RightSidebar = () => {
   return (
     <Sidebar side="right" className="border-l border-border/50">
       <SidebarHeader className="p-4 border-b border-border/50">
@@ -78,14 +57,4 @@ const RightSidebarContent = () => {
   );
 };
 
-// Main component that wraps the sidebar in its own provider
-const RightSidebar = () => {
-  return (
-    <SidebarProvider defaultOpen={true}>
-      <RightSidebarContent />
-    </SidebarProvider>
-  );
-};
-
 export default RightSidebar;
-export { RightSidebarTrigger };

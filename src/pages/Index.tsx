@@ -1,6 +1,5 @@
-
 import { AppSidebar } from "@/components/app-sidebar"
-import RightSidebar, { RightSidebarTrigger } from "@/components/RightSidebar"
+import RightSidebar from "@/components/RightSidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,9 +39,6 @@ const Index = () => {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <div className="ml-auto">
-              <RightSidebarTrigger />
-            </div>
           </header>
           
           <div className="flex flex-1 flex-col gap-4 p-4">
